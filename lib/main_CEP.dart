@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 Future<Endereco> buscaEndereco(String cep) async {
   final response = await http.get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
-
+  
 
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
@@ -20,7 +20,7 @@ Future<Endereco> buscaEndereco(String cep) async {
 }
 
 class Endereco {
-  final String cepSaida;
+  final String cep;
   final String rua;
   final String complemento;
   final String bairro;
@@ -29,7 +29,7 @@ class Endereco {
   final String ddd;
 
   const Endereco({
-    required this.cepSaida,
+    required this.cep,
     required this.rua,
     required this.complemento,
     required this.bairro,
@@ -40,7 +40,7 @@ class Endereco {
 
   factory Endereco.fromJson(Map<String, dynamic> json) {
     return Endereco(
-      cepSaida: json['cepSaida'],
+      cep: json['cep'],
       rua: json['logradouro'],
       complemento: json['complemento'],
       bairro: json['bairro'],
@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     // Inicializa a variável com um CEP padrão (ou vazio)
-    futureEndereco = buscaEndereco('');
+    futureEndereco = buscaEndereco('14783069');
   }
 
   @override
@@ -107,7 +107,7 @@ class _MyAppState extends State<MyApp> {
                   if (snapshot.hasData) {
                     var endereco = snapshot.data;
                     return Text(
-                      "CEP: ${endereco!.cepSaida}\nEndereço: ${endereco.rua}\nComplemento: ${endereco.complemento}\nBairro: ${endereco.bairro}\nCidade: ${endereco.cidade} - ${endereco.estado}\nDDD: ${endereco.ddd}",
+                      "\n\n\n\n\n\n\nCEP: ${endereco!.cep}\nEndereço: ${endereco.rua}\nComplemento: ${endereco.complemento}\nBairro: ${endereco.bairro}\nCidade: ${endereco.cidade} - ${endereco.estado}\nDDD: ${endereco.ddd}",
                     );
                   } else if (snapshot.hasError) {
                     return Text('${snapshot.error}');
