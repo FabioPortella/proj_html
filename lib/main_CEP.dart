@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-Future<Endereco> buscaEndereco() async {
-  final response =
-      await http.get(Uri.parse('https://viacep.com.br/ws/14781449/json/'));
+Future<Endereco> buscaEndereco(String cep) async {
+  final response = await http.get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
+
 
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
@@ -20,7 +20,7 @@ Future<Endereco> buscaEndereco() async {
 }
 
 class Endereco {
-  final String cep;
+  final String cepSaida;
   final String rua;
   final String complemento;
   final String bairro;
@@ -29,7 +29,7 @@ class Endereco {
   final String ddd;
 
   const Endereco({
-    required this.cep,
+    required this.cepSaida,
     required this.rua,
     required this.complemento,
     required this.bairro,
@@ -40,7 +40,7 @@ class Endereco {
 
   factory Endereco.fromJson(Map<String, dynamic> json) {
     return Endereco(
-      cep: json['cep'],
+      cepSaida: json['cepSaida'],
       rua: json['logradouro'],
       complemento: json['complemento'],
       bairro: json['bairro'],
@@ -62,11 +62,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late Future<Endereco> futureEndereco;
+  final cepController = TextEditingController(); // Controlador para o campo de entrada
 
   @override
   void initState() {
     super.initState();
-    futureEndereco = buscaEndereco();
+    // Inicializa a variável com um CEP padrão (ou vazio)
+    futureEndereco = buscaEndereco('');
   }
 
   @override
@@ -81,29 +83,50 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Busca dados em CEP'),
         ),
         body: Center(
-          child: FutureBuilder<Endereco>(
-            future: futureEndereco,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var cep = snapshot.data!.cep;
-                var rua = snapshot.data!.rua;
-                var complemento = snapshot.data!.complemento;
-                var bairro = snapshot.data!.bairro;
-                var cidade = snapshot.data!.cidade;
-                var estado = snapshot.data!.estado;
-                var ddd = snapshot.data!.ddd;
-                return Text(
-                    "CEP: $cep\nEndereço: $rua\nComplemento: $complemento\nBairro: $bairro\nCidade: $cidade - $estado\nDDD: $ddd");
-              } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
-              }
+          child: Column(
+            children: <Widget>[
+              // Campo de entrada de texto para o CEP
+              TextField(
+                controller: cepController,
+                decoration: const InputDecoration(labelText: 'Insira o CEP'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Obtém o CEP inserido pelo usuário
+                  String cep = cepController.text;
+                  // Atualiza a URL da solicitação com o novo CEP
+                  setState(() {
+                    futureEndereco = buscaEndereco(cep);
+                  });
+                },
+                child: const Text('Buscar'),
+              ),
+              FutureBuilder<Endereco>(
+                future: futureEndereco,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    var endereco = snapshot.data;
+                    return Text(
+                      "CEP: ${endereco!.cepSaida}\nEndereço: ${endereco.rua}\nComplemento: ${endereco.complemento}\nBairro: ${endereco.bairro}\nCidade: ${endereco.cidade} - ${endereco.estado}\nDDD: ${endereco.ddd}",
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
 
-              // By default, show a loading spinner.
-              return const CircularProgressIndicator();
-            },
+                  return const CircularProgressIndicator();
+                },
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose do controlador de texto quando não for mais necessário
+    cepController.dispose();
+    super.dispose();
   }
 }
