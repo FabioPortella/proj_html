@@ -107,7 +107,7 @@ class _MyAppState extends State<MyApp> {
                   if (snapshot.hasData) {
                     var endereco = snapshot.data;
                     return Text(
-                      "\n\n\n\n\n\n\nCEP: ${endereco!.cep}\nEndereço: ${endereco.rua}\nComplemento: ${endereco.complemento}\nBairro: ${endereco.bairro}\nCidade: ${endereco.cidade} - ${endereco.estado}\nDDD: ${endereco.ddd}",
+                      "\n\n\n\n\n\n\nCEP: ${endereco!.cep}\nEnd.: ${endereco.rua} ${endereco.complemento}\nBairro: ${endereco.bairro}\nCidade: ${endereco.cidade} - ${endereco.estado}\nDDD: ${endereco.ddd}",
                     );
                   } else if (snapshot.hasError) {
                     return Text('${snapshot.error}');
